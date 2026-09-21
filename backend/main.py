@@ -83,6 +83,17 @@ app.add_middleware(
 
 # ── Routes ─────────────────────────────────────────────────────────────
 
+@app.get("/")
+async def root():
+    """Root info endpoint."""
+    return {
+        "status": "ok",
+        "service": "mossguard",
+        "docs": "/docs",
+        "health": "/health",
+    }
+
+
 @app.get("/health")
 async def health():
     """Basic health check."""

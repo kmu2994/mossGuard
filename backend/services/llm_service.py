@@ -73,6 +73,8 @@ class LLMService:
         self._client = AsyncOpenAI(
             api_key=settings.api_key,
             base_url=settings.LLM_BASE_URL or None,
+            max_retries=0,
+            timeout=10.0,
         )
         self._model = settings.LLM_MODEL
 
