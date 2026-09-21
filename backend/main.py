@@ -99,6 +99,14 @@ async def validate(req: ValidateRequest):
       2. Retrieve supporting context per claim (Moss)
       3. Classify each claim as grounded / contradicted / unsupported (LLM)
     """
+    global pipeline
     if pipeline is None:
-        raise RuntimeError("Pipeline not initialised.")
+        logger.info("Initializing MossGuard pipeline on demand...")
+        llm_svc = LLMService()
+        retrieval_svc = RetrievalService()
+        try:
+            await retrieval_svc.load_index()
+        except Exception as exc:
+            logger.warning("Moss index load warning: %s", exc)
+        pipeline = ValidationPipeline(llm_svc, retrieval_svc)
     return await pipeline.validate(req.text)

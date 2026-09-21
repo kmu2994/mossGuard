@@ -183,6 +183,23 @@ The frontend dashboard will run at **`http://localhost:3000`**.
 
 ---
 
+## 🌐 Deploying on Vercel
+
+MossGuard is pre-configured for **1-Click Vercel Deployment** containing both the Next.js frontend and the serverless Python FastAPI backend.
+
+### 1-Click Vercel Deployment
+
+1. Go to [Vercel Dashboard](https://vercel.com/new) and click **Import Repository** (`https://github.com/kmu2994/mossGuard.git`).
+2. Add your **Environment Variables** in Vercel settings:
+   - `OPENAI_API_KEY`: Your LLM API key
+   - `LLM_BASE_URL`: `https://llm.hidevs.xyz/v1` (optional if using custom API gateway)
+   - `LLM_MODEL`: `gemini-3.5-flash` or `gemini-3.6-flash`
+   - `MOSS_PROJECT_ID`: Your Moss Project ID (optional)
+   - `MOSS_PROJECT_KEY`: Your Moss Project Key (optional)
+3. Click **Deploy**. Vercel will build both the Next.js frontend and the Python serverless API functions automatically via `vercel.json`!
+
+---
+
 ## 🎯 Demo & "Caught It" Sample Test
 
 Open **`http://localhost:3000`**, click **📋 Load Sample** (or paste the text below), and click **⚡ Run Guardrail Check**:
