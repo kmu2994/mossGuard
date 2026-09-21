@@ -1,0 +1,97 @@
+.badge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 28px;
+  border-radius: 14px;
+  overflow: hidden;
+  animation: fadeIn 0.4s ease-out;
+}
+
+/* ── Status variants ─────────────────────────────────── */
+
+.safe {
+  background: var(--verdict-grounded-bg);
+  border: 1px solid var(--verdict-grounded-border);
+}
+
+.unsafe {
+  background: var(--verdict-contradicted-bg);
+  border: 1px solid var(--verdict-contradicted-border);
+}
+
+/* ── Content ─────────────────────────────────────────── */
+
+.icon {
+  font-size: 1.5rem;
+  z-index: 1;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 1;
+}
+
+.label {
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.safe .label {
+  color: var(--verdict-grounded);
+}
+
+.unsafe .label {
+  color: var(--verdict-contradicted);
+}
+
+.detail {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+/* ── Glow (subtle pulse for light theme) ─────────────── */
+
+.glow {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.safe .glow {
+  background: radial-gradient(ellipse at center, rgba(15, 157, 88, 0.06), transparent);
+  animation: subtlePulse 3s ease-in-out infinite;
+}
+
+.unsafe .glow {
+  background: radial-gradient(ellipse at center, rgba(217, 48, 37, 0.06), transparent);
+  animation: subtlePulse 3s ease-in-out infinite;
+}
+
+/* ── Animations ──────────────────────────────────────── */
+
+@keyframes subtlePulse {
+  0%, 100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

@@ -1,0 +1,221 @@
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: var(--card-shadow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  animation: fadeSlideUp 0.4s ease-out both;
+  border-left: 4px solid transparent;
+}
+
+.card:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--card-shadow-hover);
+}
+
+/* ── Verdict colors ──────────────────────────────────── */
+
+.grounded {
+  border-left-color: var(--verdict-grounded);
+}
+
+.contradicted {
+  border-left-color: var(--verdict-contradicted);
+}
+
+.unsupported {
+  border-left-color: var(--verdict-unsupported);
+}
+
+/* ── Header ──────────────────────────────────────────── */
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 5px 12px;
+  border-radius: 6px;
+}
+
+.badgeIcon {
+  font-size: 0.85rem;
+}
+
+.badge_grounded {
+  color: var(--verdict-grounded);
+  background: var(--verdict-grounded-bg);
+  border: 1px solid var(--verdict-grounded-border);
+}
+
+.badge_contradicted {
+  color: var(--verdict-contradicted);
+  background: var(--verdict-contradicted-bg);
+  border: 1px solid var(--verdict-contradicted-border);
+}
+
+.badge_unsupported {
+  color: var(--verdict-unsupported);
+  background: var(--verdict-unsupported-bg);
+  border: 1px solid var(--verdict-unsupported-border);
+}
+
+/* ── Timings ─────────────────────────────────────────── */
+
+.timings {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.timing {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.timingTotal {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  background: var(--bg-elevated);
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+/* ── Claim text ──────────────────────────────────────── */
+
+.claimText {
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--text-primary);
+  margin: 0 0 16px;
+  font-style: italic;
+}
+
+/* ── Confidence ──────────────────────────────────────── */
+
+.meta {
+  margin-bottom: 12px;
+}
+
+.confidenceBar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.confidenceLabel {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  min-width: 72px;
+}
+
+.confidenceTrack {
+  flex: 1;
+  height: 6px;
+  background: var(--bg-elevated);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.confidenceFill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.fill_grounded {
+  background: var(--verdict-grounded);
+}
+
+.fill_contradicted {
+  background: var(--verdict-contradicted);
+}
+
+.fill_unsupported {
+  background: var(--verdict-unsupported);
+}
+
+.confidenceValue {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  min-width: 36px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.reason {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ── Context ─────────────────────────────────────────── */
+
+.contextSection {
+  margin-top: 8px;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+
+.contextToggle {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px 0;
+  user-select: none;
+  transition: color 0.2s;
+}
+
+.contextToggle:hover {
+  color: var(--accent-teal);
+}
+
+.contextList {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.contextItem {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  padding: 10px 14px;
+  background: var(--bg-primary);
+  border-radius: 8px;
+  border-left: 2px solid var(--accent-teal-light);
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
