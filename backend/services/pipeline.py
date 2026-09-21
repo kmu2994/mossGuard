@@ -105,24 +105,36 @@ class ValidationPipeline:
         return result.verdict, result.confidence, result.reason, latency_ms
 
     async def _process_single_claim(self, claim: str) -> ClaimResult:
-        """Run retrieval + classification for one claim."""
-        # Step 1: Retrieve
-        contexts, retrieval_ms = await self._retrieve_for_claim(claim)
+        """Run retrieval + classification for one claim safely."""
+        try:
+            # Step 1: Retrieve
+            contexts, retrieval_ms = await self._retrieve_for_claim(claim)
 
-        # Step 2: Classify
-        verdict, confidence, reason, verdict_ms = await self._classify_claim(
-            claim, contexts
-        )
+            # Step 2: Classify
+            verdict, confidence, reason, verdict_ms = await self._classify_claim(
+                claim, contexts
+            )
 
-        return ClaimResult(
-            claim=claim,
-            verdict=Verdict(verdict),
-            confidence=confidence,
-            reason=reason,
-            matched_context=contexts,
-            retrieval_latency_ms=round(retrieval_ms, 2),
-            verdict_latency_ms=round(verdict_ms, 2),
-        )
+            return ClaimResult(
+                claim=claim,
+                verdict=Verdict(verdict),
+                confidence=confidence,
+                reason=reason,
+                matched_context=contexts,
+                retrieval_latency_ms=round(retrieval_ms, 2),
+                verdict_latency_ms=round(verdict_ms, 2),
+            )
+        except Exception as exc:
+            logger.error("Error processing claim '%s': %s", claim, exc)
+            return ClaimResult(
+                claim=claim,
+                verdict=Verdict.UNSUPPORTED,
+                confidence=0.0,
+                reason=f"Processing fallback: {exc}",
+                matched_context=[],
+                retrieval_latency_ms=0.0,
+                verdict_latency_ms=0.0,
+            )
 
     async def validate(self, text: str) -> ValidateResponse:
         """
