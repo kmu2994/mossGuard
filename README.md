@@ -191,7 +191,7 @@ MossGuard is pre-configured for **1-Click Vercel Deployment** containing both th
 
 1. Go to [Vercel Dashboard](https://vercel.com/new) and click **Import Repository** (`https://github.com/kmu2994/mossGuard.git`).
 2. Add your **Environment Variables** in Vercel settings:
-   - `OPENAI_API_KEY`: Your LLM API key
+   - `GEMINI_KEY`: Your Gemini API key (`sk-ootiGs9FLWaIdqzNX_ogsTYCQ9O09KJtpU65eJOgDCQ`)
    - `LLM_BASE_URL`: `https://llm.hidevs.xyz/v1` (optional if using custom API gateway)
    - `LLM_MODEL`: `gemini-3.5-flash` or `gemini-3.6-flash`
    - `MOSS_PROJECT_ID`: Your Moss Project ID (optional)

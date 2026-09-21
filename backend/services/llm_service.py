@@ -71,7 +71,7 @@ class LLMService:
     def __init__(self) -> None:
         settings = get_settings()
         self._client = AsyncOpenAI(
-            api_key=settings.OPENAI_API_KEY,
+            api_key=settings.api_key,
             base_url=settings.LLM_BASE_URL or None,
         )
         self._model = settings.LLM_MODEL
