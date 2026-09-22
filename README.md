@@ -29,30 +29,65 @@ In production AI agent guardrails, latency is the bottleneck. Traditional RAG sy
 
 ```mermaid
 flowchart TD
-    subgraph Client ["Client Layer"]
-        UI["Next.js 15 Dashboard<br/>(React / TypeScript)"]
+    subgraph Layer1 ["1. Client Layer"]
+        UI["Next.js 15 Web Dashboard<br/>(React 19 / TypeScript)"]
+        LiveKitVoiceUI["LiveKit WebRTC Voice Client<br/>(Audio Visualizer & Stream Streamer)"]
     end
 
-    subgraph API ["API & Orchestration Layer"]
+    subgraph Layer2 ["2. Security & Transport Gateway"]
+        AuthMiddleware["OAuth2 / JWT Bearer Auth<br/>(HS256 Token Verification)"]
+        RateLimiter["Sliding Window Rate Limiter<br/>(60 req/min Enforcement)"]
+        TLS["TLS 1.3 / HTTPS Encryption<br/>(Data in Transit)"]
+    end
+
+    subgraph Layer3 ["3. Real-Time Stream & WebRTC Gateway"]
+        LiveKitServer["LiveKit WebRTC Server<br/>(Audio Stream Room Management)"]
+        VoiceSTT["Speech-to-Text Transcriber<br/>(Opus Stream Ingestion)"]
+    end
+
+    subgraph Layer4 ["4. API & Async Orchestration"]
         FastAPI["FastAPI Backend Server<br/>(Python 3.11 / Uvicorn)"]
-        Pipeline["Validation Pipeline<br/>(Async Orchestration)"]
+        Pipeline["Validation Pipeline Orchestrator<br/>(Async Parallel asyncio.gather)"]
+        OTel["OpenTelemetry Tracer<br/>(x-trace-id Header Correlation)"]
     end
 
-    subgraph Core ["Processing & Retrieval Core"]
-        LLM_Extract["LLM Claim Extractor<br/>(GPT-4o-mini)"]
-        MossIndex[("Moss In-Memory KB<br/>Sub-10ms Semantic Index")]
+    subgraph Layer5 ["5. Retrieval & Storage Layer"]
+        MossCloud["Moss Cloud Index<br/>(Remote Index Storage)"]
+        MossRuntime[("Moss In-Memory Local Runtime<br/>Sub-10ms Semantic Index")]
+        KB_Docs["AES-256 Knowledge Base Docs<br/>(Data at Rest Encryption)"]
+    end
+
+    subgraph Layer6 ["6. Intelligence & CRISPE LLM Engine"]
+        CRISPE_Formatter["CRISPE Prompt Formatter<br/>(Capacity, Role, Insight, Statement, Personality, Experiment)"]
+        LLM_Extract["LLM Claim Extractor<br/>(Gemini / OpenAI API)"]
         LLM_Classify["LLM Verdict Classifier<br/>(Grounded / Contradicted / Unsupported)"]
     end
 
-    UI -->|"POST /v1/validate"| FastAPI
-    FastAPI --> Pipeline
-    Pipeline -->|"Step 1: Extract discrete claims"| LLM_Extract
-    LLM_Extract -->|"Claims Array"| Pipeline
-    Pipeline -->|"Step 2: Concurrent query (Sub-10ms)"| MossIndex
-    MossIndex -->|"Matched Context Passages"| Pipeline
-    Pipeline -->|"Step 3: Fact-check claim vs context"| LLM_Classify
+    UI -->|"HTTP/2 REST & WebSocket"| TLS
+    LiveKitVoiceUI -->|"WebRTC / SRTP Audio Stream"| LiveKitServer
+    LiveKitServer -->|"Transcribed Audio Text"| VoiceSTT
+    VoiceSTT -->|"POST /v1/livekit/process-audio-stream"| AuthMiddleware
+
+    TLS --> AuthMiddleware
+    AuthMiddleware --> RateLimiter
+    RateLimiter --> FastAPI
+    FastAPI --> OTel
+    OTel --> Pipeline
+
+    Pipeline -->|"Step 1: Format CRISPE Extraction Prompt"| CRISPE_Formatter
+    CRISPE_Formatter --> LLM_Extract
+    LLM_Extract -->|"Discrete Claims Array"| Pipeline
+
+    Pipeline -->|"Step 2: Sub-10ms Vector Search"| MossRuntime
+    MossRuntime <-->|"Sync & Warm Index"| MossCloud
+    MossRuntime -->|"AES-256 Passages"| KB_Docs
+    KB_Docs -->|"Matched Context Passages"| Pipeline
+
+    Pipeline -->|"Step 3: Format CRISPE Verdict Prompt"| CRISPE_Formatter
+    CRISPE_Formatter --> LLM_Classify
     LLM_Classify -->|"Verdict + Confidence + Reason"| Pipeline
-    Pipeline -->|"ValidateResponse JSON + Latency Breakdown"| UI
+
+    Pipeline -->|"ValidateResponse / StreamResponse JSON"| UI
 ```
 
 ---
@@ -62,29 +97,29 @@ flowchart TD
 ### 1. Executive Summary & Problem Statement
 Large Language Model (LLM) agents are increasingly deployed in customer-facing and mission-critical roles (customer support, medical assistance, enterprise software). However, LLMs regularly generate **hallucinations**—statements that sound convincing but contradict internal product docs, SLAs, or security guidelines.
 
-Existing guardrail approaches rely on heavy post-processing or remote vector database roundtrips, introducing high latency that breaks real-time user experience. **MossGuard** provides real-time, fine-grained fact verification by pairing LLM extraction and classification with **Moss's sub-10ms in-memory vector search**, stopping hallucinated claims in their tracks.
+Existing guardrail approaches rely on heavy post-processing or remote vector database roundtrips, introducing high latency that breaks real-time user experience. **MossGuard** provides real-time, fine-grained fact verification by pairing CRISPE LLM extraction and classification with **Moss's sub-10ms in-memory vector search** and **LiveKit WebRTC real-time voice stream evaluation**.
 
 ### 2. Core User Experience & Workflow
-1. **Input Agent Text**: The user/system submits an AI agent's generated response to MossGuard.
-2. **Discrete Claim Extraction**: An LLM parses the block of text and isolates checkable factual statements (e.g. pricing figures, SLA guarantees, security features), excluding subjective opinions.
-3. **Sub-10ms Context Retrieval**: For each extracted claim, Moss retrieves the most relevant context passages from the local in-memory index in **under 10ms**.
-4. **Verdict Classification**: The claim is compared against the retrieved context passages to render a verdict:
-   - 🟢 **Grounded**: Verified by knowledge base content.
-   - 🔴 **Contradicted**: Explicitly refuted by knowledge base content (hallucination caught).
-   - 🟡 **Unsupported**: Information not present in knowledge base.
-5. **Real-time Diagnostics**: The dashboard renders individual claim cards, confidence scores, source context excerpts, and a latency breakdown bar highlighting Moss's ultra-low retrieval overhead.
+1. **Input Agent Text or LiveKit Voice Stream**: The user/system submits an AI agent's text or connects a LiveKit WebRTC audio stream to MossGuard.
+2. **Discrete Claim Extraction (CRISPE Framework)**: An LLM parses the stream and isolates checkable factual statements using structured CRISPE prompts.
+3. **Sub-10ms Context Retrieval**: For each extracted claim, Moss retrieves context passages from the local in-memory index in **under 10ms**.
+4. **Verdict Classification**: The claim is evaluated against retrieved context passages to render a verdict (*Grounded*, *Contradicted*, *Unsupported*).
+5. **Real-time Diagnostics & Security Audit**: The dashboard renders claim cards, confidence scores, LiveKit stream waveforms, latency breakdowns, and security compliance badges.
 
 ### 3. Key Functional & Technical Requirements
-- **Sub-10ms Retrieval SLA**: All Moss index queries must execute within <10ms to ensure end-to-end responsiveness.
-- **Provider-Agnostic Abstraction**: LLM interface cleanly decoupled to allow swapping providers (OpenAI, Anthropic, local models).
-- **Concurrent Processing**: Multi-claim retrieval and verdict classification must execute concurrently using Python `asyncio.gather`.
-- **Transparent Diagnostics**: Every response includes per-stage latency timings (`extraction_ms`, `total_retrieval_ms`, `total_verdict_ms`, `total_ms`).
-- **Resilient Fallbacks**: Graceful handling of missing context or unparseable model responses without crashing the pipeline.
+- **Mandatory LiveKit WebRTC Support**: LiveKit token generation (`POST /v1/livekit/token`) and real-time audio transcript stream evaluation (`POST /v1/livekit/process-audio-stream`).
+- **Sub-10ms Retrieval SLA**: All Moss index queries execute within <10ms to ensure end-to-end responsiveness.
+- **Provider-Agnostic Abstraction**: Decoupled LLM interface for easy swapping of models.
+- **Concurrent Processing**: Parallel claim retrieval and verdict classification using Python `asyncio.gather`.
+- **OpenTelemetry Observability**: Request-level trace correlation via `x-trace-id` headers.
 
-### 4. Non-Functional Requirements
-- **Security**: No raw prompt injection exposure; claims strictly evaluated against trusted knowledge base passages.
-- **Scalability**: In-memory retrieval scale allows thousands of queries per second per process.
-- **Usability**: High-contrast, glassmorphic dark mode dashboard with zero-config sample loading for fast hackathon judging.
+### 4. Security & Compliance Requirements
+- **OAuth2 / JWT Authentication**: Mandates OAuth2 JWT Bearer Token authorization (`HS256`, 60-minute expiration) for API endpoints (`POST /v1/auth/token`).
+- **Rate Limiting**: FastAPI backend enforces sliding-window rate limiting capped at **60 requests per minute per IP**, returning `HTTP 429 Too Many Requests` upon limit breach.
+- **Explicit Encryption Standards**:
+  - **Data at Rest**: Mandates **AES-256** encryption for knowledge base documents, cached vector indexes, and application credentials.
+  - **Data in Transit**: Mandates **TLS 1.3** for REST/HTTP API endpoints and **WebRTC / SRTP** for LiveKit audio stream transmission.
+- **CRISPE Prompt Engineering Standard**: All LLM prompts adhere strictly to the **CRISPE** framework (Capacity, Role, Insight, Statement, Personality, Experiment/Format) ensuring zero codeblock corruption and deterministic JSON outputs.
 
 ---
 
@@ -213,7 +248,7 @@ Open **`http://localhost:3000`**, click **📋 Load Sample** (or paste the text 
 - 🔴 **Contradicted**: *"guarantee 99.99% uptime"* (KB states 99.9% uptime SLA, explicitly NOT 99.99%)
 - 🔴 **Contradicted**: *"fully HIPAA compliant"* (KB states CloudVault is NOT HIPAA compliant)
 
----
+
 
 ## 🔌 API Reference
 
@@ -265,9 +300,10 @@ Returns system health status: `{"status": "ok", "service": "mossguard"}`.
 | `MOSS_PROJECT_ID` | Backend | Moss Project ID from moss.dev | *Required* |
 | `MOSS_PROJECT_KEY` | Backend | Moss Project API Key | *Required* |
 | `MOSS_INDEX_NAME` | Backend | Moss index identifier | `mossguard-kb` |
-| `OPENAI_API_KEY` | Backend | OpenAI API Key for claim extraction & classification | *Required* |
-| `LLM_MODEL` | Backend | OpenAI model name | `gpt-4o-mini` |
-| `NEXT_PUBLIC_API_URL` | Frontend | Backend URL endpoint | `http://localhost:8000` |
+| `GEMINI_KEY` | Backend | Gemini API Key for claim extraction & classification | *Required* |
+| `LLM_BASE_URL` | Backend | Custom LLM endpoint gateway | `https://llm.hidevs.xyz/v1` |
+| `LLM_MODEL` | Backend | Gemini model (`gemini-3.5-flash-lite`, `gemini-3.5-flash`, `gemini-3.6-flash`) | `gemini-3.5-flash-lite` |
+| `NEXT_PUBLIC_API_URL` | Frontend | Backend URL endpoint | `http://127.0.0.1:8000` |
 
 ---
 

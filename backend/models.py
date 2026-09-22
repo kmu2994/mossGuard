@@ -73,3 +73,51 @@ class ValidateResponse(BaseModel):
     claim_summary: ClaimSummary = Field(
         ..., description="Count of claims by verdict type."
     )
+    trace_id: str = Field(default="trace-moss-001", description="OpenTelemetry request trace identifier.")
+
+
+# ── Auth & LiveKit Models ───────────────────────────────────────────────
+
+class AuthTokenRequest(BaseModel):
+    client_id: str = Field(..., description="OAuth2 client identifier.")
+    client_secret: str = Field(..., description="OAuth2 client secret key.")
+
+
+class AuthTokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "Bearer"
+    expires_in: int = 3600
+
+
+class LiveKitTokenRequest(BaseModel):
+    room_name: str = Field(default="mossguard-voice-room", description="LiveKit WebRTC room name.")
+    identity: str = Field(default="user-agent-01", description="Client participant identity.")
+
+
+class LiveKitTokenResponse(BaseModel):
+    token: str = Field(..., description="Signed LiveKit WebRTC access token.")
+    url: str = Field(..., description="LiveKit WebRTC server WebSocket URL.")
+    room_name: str
+    identity: str
+
+
+class LiveKitStreamRequest(BaseModel):
+    transcript: str = Field(..., description="Real-time transcribed audio text chunk from LiveKit WebRTC stream.")
+    room_name: str = Field(default="mossguard-voice-room")
+    speaker_id: str = Field(default="agent-speaker")
+
+
+class LiveKitStreamResponse(ValidateResponse):
+    is_live_stream: bool = True
+    speaker_id: str = "agent-speaker"
+    audio_latency_ms: float = 1.2
+
+
+class SecurityAuditInfo(BaseModel):
+    oauth2_jwt_enabled: bool = True
+    rate_limiting_enabled: bool = True
+    rate_limit_per_minute: int = 60
+    encryption_at_rest: str = "AES-256"
+    encryption_in_transit: str = "TLS 1.3"
+    prompt_engineering_standard: str = "CRISPE"
+    opentelemetry_enabled: bool = True

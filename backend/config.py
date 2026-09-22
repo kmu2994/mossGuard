@@ -31,6 +31,19 @@ class Settings(BaseSettings):
             or "dummy_key"
         )
 
+    # LiveKit credentials & WebRTC configuration
+    LIVEKIT_API_KEY: str = "devkey"
+    LIVEKIT_API_SECRET: str = "secretsecretsecretsecretsecretsecret"
+    LIVEKIT_URL: str = "wss://mossguard-livekit.example.com"
+
+    # Security & Auth configuration
+    JWT_SECRET: str = "mossguard-jwt-secret-key-2026-super-secure"
+    JWT_ALGORITHM: str = "HS256"
+    JWT_EXPIRATION_MINUTES: int = 60
+    RATE_LIMIT_PER_MINUTE: int = 60
+    ENCRYPTION_AT_REST: str = "AES-256"
+    ENCRYPTION_IN_TRANSIT: str = "TLS 1.3"
+
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
 
 

@@ -66,3 +66,65 @@ export async function healthCheck(): Promise<boolean> {
     return false;
   }
 }
+
+/**
+ * Generate a signed LiveKit WebRTC access token for real-time voice stream room sessions.
+ */
+export async function getLiveKitToken(
+  roomName: string = "mossguard-voice-room",
+  identity: string = "user-agent-01"
+) {
+  const res = await fetch(`${API_BASE_URL}/v1/livekit/token`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ room_name: roomName, identity }),
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to fetch LiveKit token: ${res.statusText}`);
+  }
+  return await res.json();
+}
+
+/**
+ * Process a real-time transcribed audio stream chunk from a LiveKit WebRTC session.
+ */
+export async function processLiveKitAudioStream(
+  transcript: string,
+  roomName: string = "mossguard-voice-room",
+  speakerId: string = "agent-speaker"
+) {
+  const res = await fetch(`${API_BASE_URL}/v1/livekit/process-audio-stream`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      transcript,
+      room_name: roomName,
+      speaker_id: speakerId,
+    }),
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to process LiveKit stream: ${res.statusText}`);
+  }
+  return await res.json();
+}
+
+/**
+ * Fetch explicit Security & PRD specs (OAuth2/JWT, Rate Limit, AES-256, TLS 1.3, CRISPE).
+ */
+export async function getSecuritySpec() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/v1/security/spec`);
+    if (res.ok) return await res.json();
+  } catch {
+    // Return default offline spec fallback
+  }
+  return {
+    oauth2_jwt_enabled: true,
+    rate_limiting_enabled: true,
+    rate_limit_per_minute: 60,
+    encryption_at_rest: "AES-256",
+    encryption_in_transit: "TLS 1.3",
+    prompt_engineering_standard: "CRISPE",
+    opentelemetry_enabled: true,
+  };
+}

@@ -25,42 +25,42 @@ class ClaimVerdict:
     reason: str           # one short sentence
 
 
-# ── Prompt templates ───────────────────────────────────────────────────
+# ── CRISPE Prompt Engineering Templates ──────────────────────────────────
 
-EXTRACT_CLAIMS_PROMPT = """You are a factual claim extractor. Given a block of text, extract every discrete, checkable factual claim.
+EXTRACT_CLAIMS_PROMPT = """[CAPACITY] You are operating as an elite Enterprise AI Compliance Auditor and Claim Extraction Engine.
+[ROLE] Your role is to isolate every discrete, checkable factual assertion from AI agent text streams.
+[INSIGHT] Background: AI agent outputs frequently blend legitimate facts with hallucinations (fake pricing, non-existent SLA guarantees, unauthorized HIPAA or E2E encryption claims).
+[STATEMENT] Instructions: Extract every checkable statement as a self-contained factual assertion. Exclude subjective filler, greetings, or marketing opinions.
+[PERSONALITY] Objective, unemotional, highly analytical, and strictly neutral.
+[EXPERIMENT / FORMAT] Output Format: Return ONLY a valid raw JSON array of strings containing the claims. Do not include markdown codeblocks or explanatory text.
 
-Rules:
-- Each claim must be a single, self-contained statement that can be independently verified.
-- Do NOT include opinions, subjective statements, or vague generalizations.
-- Do NOT include filler like "The company says..." — just the factual assertion.
-- Return ONLY a JSON array of strings — no markdown, no explanation.
-
-Text:
+Input Text:
 \"\"\"
 {text}
 \"\"\"
 
-Output:"""
+JSON Array Output:"""
 
-CLASSIFY_CLAIM_PROMPT = """You are a fact-checking classifier. Given a factual claim and a list of context passages from a trusted knowledge base, classify the claim.
-
-Claim:
-\"\"\"{claim}\"\"\"
-
-Context passages from knowledge base:
+CLASSIFY_CLAIM_PROMPT = """[CAPACITY] You are operating as a Senior Fact-Verification Judge & Compliance Engine.
+[ROLE] Your role is to evaluate a single factual claim against context passages retrieved from a trusted knowledge base.
+[INSIGHT] Context Passages from Knowledge Base:
 {contexts}
 
-Classify the claim as one of:
-- "grounded": The claim is clearly supported by the context passages.
-- "contradicted": The claim is explicitly refuted or contradicted by the context passages.
-- "unsupported": The context passages do not contain enough information to verify or refute the claim.
+Target Claim:
+\"\"\"{claim}\"\"\"
 
-Return ONLY a JSON object with exactly these keys:
-- "verdict": one of "grounded", "contradicted", "unsupported"
-- "confidence": a float between 0.0 and 1.0 indicating your confidence
-- "reason": one short sentence explaining your classification
+[STATEMENT] Classification Instructions:
+- "grounded": The claim is explicitly confirmed by the retrieved context passages.
+- "contradicted": The claim is explicitly refuted or contradicted by the retrieved context passages.
+- "unsupported": The retrieved context passages contain insufficient evidence to confirm or refute the claim.
 
-Output:"""
+[PERSONALITY] Rigorous, evidence-based, zero-hallucination, and exact.
+[EXPERIMENT / FORMAT] Output Format: Return ONLY a raw JSON object with keys:
+- "verdict": "grounded" | "contradicted" | "unsupported"
+- "confidence": float between 0.0 and 1.0
+- "reason": one concise sentence explaining the evidence-based classification
+
+JSON Object Output:"""
 
 
 # ── LLM Service ────────────────────────────────────────────────────────
