@@ -265,8 +265,8 @@ Returns system health status: `{"status": "ok", "service": "mossguard"}`.
 | `MOSS_PROJECT_ID` | Backend | Moss Project ID from moss.dev | *Required* |
 | `MOSS_PROJECT_KEY` | Backend | Moss Project API Key | *Required* |
 | `MOSS_INDEX_NAME` | Backend | Moss index identifier | `mossguard-kb` |
-| `OPENAI_API_KEY` | Backend | OpenAI API Key for claim extraction & classification | *Required* |
-| `LLM_MODEL` | Backend | OpenAI model name | `gpt-4o-mini` |
+| `GEMINI_API_KEY` | Backend | OpenAI API Key for claim extraction & classification | *Required* |
+| `LLM_MODEL` | Backend | OpenAI model name | `gmini model` |
 | `NEXT_PUBLIC_API_URL` | Frontend | Backend URL endpoint | `http://localhost:8000` |
 
 ---
